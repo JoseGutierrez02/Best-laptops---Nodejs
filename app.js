@@ -2,7 +2,17 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var multer  = require('multer');
-var upload = multer({ dest: 'uploads/' });
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+      cb(null, 'uploads/')
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.originalname)
+    }
+    })
+    var upload = multer({
+      storage: storage
+    })
 var cloudinary = require('cloudinary');
 
 cloudinary.config({
@@ -35,7 +45,7 @@ app.get("/",function(req,res){
   res.render("index");
 });
 
-app.post("/productos", upload.single('image'),function(req,res,next){
+app.post("/productos", upload.single('image'), function(req,res,next){
   if(req.body.password == "1234"){
     var data = {
       title: req.body.title,
@@ -46,12 +56,10 @@ app.post("/productos", upload.single('image'),function(req,res,next){
 
     var product = new Product(data);
 
-    cloudinary.uploader.upload(req.file.image.path,
+    cloudinary.uploader.upload(req.file.path,
       function(result) {
         product.imageUrl = result.url;
-
         product.save(function(err){
-          console.log(product);
           res.render("index");
         });
       });
