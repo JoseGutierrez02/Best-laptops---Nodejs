@@ -2,6 +2,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var app_password = "1234";
+var method_override = require("method-override");
 var multer  = require('multer');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -26,6 +27,7 @@ var app = express();
 mongoose.connect("mongodb://localhost/primera_pagina");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(method_override("_method"));
 
 //Definir el schema de nuestros productos
 var productSchema = {
@@ -50,6 +52,30 @@ app.get("/productos",function(req,res){
   Product.find(function(error,documento){
     if(error){ console.log(error);}
     res.render("productos/index",{ products: documento })
+  });
+});
+
+app.put("/productos/:id", function(req,res){
+  if(req.body.password == app_password){
+    var data = {
+      title: req.body.title,
+      description: req.body.description,
+      pricing: req.body.pricing
+    };
+    Product.update({"_id": req.params.id}, data, function(product){
+      res.redirect("/productos");
+    });
+  }else{
+    res.redirect("/");
+  }
+});
+
+app.get("/productos/edit/:id", function(req,res){
+  var id_producto = req.params.id;
+  console.log(id_producto);
+  Product.findOne({"_id": id_producto}, function(error,producto){
+    console.log(producto);
+    res.render("productos/edit",{ product: producto });
   });
 });
 

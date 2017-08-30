@@ -20,4 +20,7 @@ block content
           td= product.pricing
           td 
             a(href="#{product.imageUrl}" class="btn") Ver Imagen
-          td Editar - Eliminar
+          td
+            a(href="/productos/edit/#{product.id}") Editar
+            =" - "
+            a(href="#") Eliminar
