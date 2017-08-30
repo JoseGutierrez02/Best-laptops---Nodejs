@@ -1,6 +1,7 @@
 var express = require('express');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
+var app_password = "1234";
 var multer  = require('multer');
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -45,8 +46,31 @@ app.get("/",function(req,res){
   res.render("index");
 });
 
+app.get("/productos",function(req,res){
+  Product.find(function(error,documento){
+    if(error){ console.log(error);}
+    res.render("productos/index",{ products: documento })
+  });
+});
+
+app.post("/admin", function(req,res){
+  if(req.body.password == app_password){
+    Product.find(function(error,documento){
+      if(error){ console.log(error);}
+      res.render("admin/index",{ products: documento })
+    });
+  }
+  else{
+    res.redirect("/");
+  }
+});
+
+app.get("/admin", function(req,res){
+  res.render("admin/form");
+});
+
 app.post("/productos", upload.single('image'), function(req,res,next){
-  if(req.body.password == "1234"){
+  if(req.body.password == app_password){
     var data = {
       title: req.body.title,
       description: req.body.description,
